@@ -4,11 +4,14 @@ from .. import db
 from datetime import datetime
 import hashlib
 
+
 class User(db.Model):
     __tablename__ = 'users'
 
+    # pylint: disable=no-member
     uuid = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(128), unique=True, index=True)
+    email = db.Column(db.String(64), unique=True, index=True)
+    username = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     full_name = db.Column(db.Text)
     description = db.Column(db.Text)
@@ -18,20 +21,19 @@ class User(db.Model):
 
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
-    comment_replies = db.relationship('CommentReply', backref='author', lazy='dynamic')
+    comment_replies = db.relationship(
+        'CommentReply', backref='author', lazy='dynamic')
     claps = db.relationship('Clap', backref='author', lazy='dynamic')
     notifications = db.relationship(
-        'Notification', 
-        backref='author', 
+        'Notification',
+        backref='author',
         lazy='dynamic',
-        primaryjoin="Notification.author_id == User.uuid"
-    )
+        primaryjoin="Notification.author_id == User.uuid")
     notified = db.relationship(
-        'Notification', 
-        backref='from_author', 
-        lazy='dynamic', 
-        primaryjoin="Notification.from_author_id == User.uuid"
-    )
+        'Notification',
+        backref='from_author',
+        lazy='dynamic',
+        primaryjoin="Notification.from_author_id == User.uuid")
 
     @property
     def password(self):
@@ -49,16 +51,17 @@ class User(db.Model):
         from sqlalchemy.exc import IntegrityError
         from random import seed
         import forgery_py
-        
+
         seed()
         for i in range(count):
             u = User(
-                    email=forgery_py.internet.email_address(),
-                    password=forgery_py.lorem_ipsum.word(),
-                    full_name=forgery_py.name.full_name(),
-                    description=forgery_py.lorem_ipsum.sentence(),
-                    member_since=forgery_py.date.date(True)
-                )
+                username=forgery_py.internet.user_name(True),
+                email=forgery_py.internet.email_address(),
+                password=forgery_py.lorem_ipsum.word(),
+                full_name=forgery_py.name.full_name(),
+                description=forgery_py.lorem_ipsum.sentence(),
+                member_since=forgery_py.date.date(True))
+
             db.session.add(u)
 
             try:

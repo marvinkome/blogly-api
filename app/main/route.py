@@ -6,8 +6,8 @@ from flask_graphql import GraphQLView
 from flask_sqlalchemy import get_debug_queries
 
 from flask_jwt_extended import (jwt_required, jwt_optional,
-    create_access_token, create_refresh_token, get_jwt_identity,
-    jwt_refresh_token_required)
+                                create_access_token, create_refresh_token,
+                                get_jwt_identity, jwt_refresh_token_required)
 
 from . import main
 from .. import db, jwt
@@ -21,12 +21,13 @@ def graphql():
         'graphql',
         schema=schema,
         context={'session': db.session},
-        graphiql= graphqli
-    )
+        graphiql=graphqli)
 
     return jwt_optional(g)
 
+
 main.add_url_rule('/graphql', view_func=graphql())
+
 
 def validate_password(password):
     regExp = re.compile('^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|\
@@ -37,7 +38,8 @@ def validate_password(password):
     else:
         return False
 
-@main.route('/login', methods=['POST','GET'])
+
+@main.route('/login', methods=['POST', 'GET'])
 def login():
     email = request.json.get('email')
     password = request.json.get('password')
@@ -49,7 +51,7 @@ def login():
             'access_token': None,
             'refresh_token': None
         })
-    
+
     check_psw = user.verify_password(password)
     if not check_psw:
         return jsonify({
@@ -65,6 +67,7 @@ def login():
         'login': True,
         'refresh_token': refresh_token
     })
+
 
 @main.route('/register', methods=['POST'])
 def register():
@@ -82,16 +85,15 @@ def register():
     # Check if user exists
     if User.query.filter_by(email=email).first() is not None:
         return jsonify({
-            'msg': 'Email has been taken, please use a different email or login',
-            'login': False,
-            'refresh_token': None
+            'msg':
+            'Email has been taken, please use a different email or login',
+            'login':
+            False,
+            'refresh_token':
+            None
         })
 
-    user = User(
-        email=email,
-        full_name=full_name,
-        password=password
-    )
+    user = User(email=email, full_name=full_name, password=password)
     db.session.add(user)
     db.session.commit()
 
@@ -103,21 +105,21 @@ def register():
         'refresh_token': refresh_token
     })
 
+
 @main.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 def refresh():
     current_user = get_jwt_identity()
     access_token = create_access_token(identity=current_user)
-    return jsonify({
-        'refreshed': True,
-        'access_token': access_token
-    })
+    return jsonify({'refreshed': True, 'access_token': access_token})
+
 
 @main.after_app_request
 def after_request(response):
     for query in get_debug_queries():
         if query.duration >= app.config['FLASKY_DB_QUERY_TIMEOUT']:
             app.logger.warning(
-                'Slow query: %s\nParameters: %s\nDuration: %fs\nContext: %s\n' %
-                (query.statement, query.parameters, query.duration, query.context))
+                'Slow query: %s\nParameters: %s\nDuration: %fs\nContext: %s\n'
+                % (query.statement, query.parameters, query.duration,
+                   query.context))
     return response

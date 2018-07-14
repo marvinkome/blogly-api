@@ -8,15 +8,25 @@ from ..model import Post as PostModel, User as UserModel
 from .. import db
 from .helpers import CustomSQLAlchemyObjectType
 
+
 class Post(CustomSQLAlchemyObjectType):
+    # pylint: disable=no-member
     class Meta:
         model = PostModel
         interfaces = (relay.Node, )
+
+    def resolve_next_title(self, _):
+        return self.next_title
+
+    def resolve_prev_title(self, _):
+        return self.prev_title
+
 
 class PostInput(graphene.InputObjectType):
     title = graphene.String(required=True)
     body = graphene.String(required=True)
     post_pic_url = graphene.String()
+
 
 class ViewPost(graphene.Mutation):
     class Arguments:
@@ -33,10 +43,12 @@ class ViewPost(graphene.Mutation):
             else:
                 post.views = 1
 
+        # pylint: disable=no-member
         db.session.add(post)
         db.session.commit()
         return ViewPost(post=post)
-        
+
+
 class CreatePost(graphene.Mutation):
     class Arguments:
         post_data = PostInput(required=True)
@@ -46,27 +58,26 @@ class CreatePost(graphene.Mutation):
     def mutate(self, info, post_data=None):
         email = get_jwt_identity()
         if email is None:
-            return GraphQLError('You need an access token to perform this action')
-        
+            return GraphQLError(
+                'You need an access token to perform this action')
+
         user = UserModel.query.filter_by(email=email).first()
 
         if post_data.post_pic_url is not None:
             post = PostModel(
                 title=post_data.title,
                 body=post_data.body,
-                post_pic_url=post_data.post_pic_url
-            )
+                post_pic_url=post_data.post_pic_url)
         else:
-            post = PostModel(
-                title=post_data.title,
-                body=post_data.body
-            )
+            post = PostModel(title=post_data.title, body=post_data.body)
 
         post.author = user
 
+        # pylint: disable=no-member
         db.session.add(post)
         db.session.commit()
         return CreatePost(post=post)
+
 
 class UpdatePost(graphene.Mutation):
     class Arguments:
@@ -80,7 +91,8 @@ class UpdatePost(graphene.Mutation):
     def mutate(self, info, post_id, title=None, body=None, post_pic_url=None):
         email = get_jwt_identity()
         if email is None:
-            return GraphQLError('You need an access token to perform this action')
+            return GraphQLError(
+                'You need an access token to perform this action')
 
         post = PostModel.query.filter_by(uuid=post_id).first()
         if post is not None:
@@ -90,10 +102,12 @@ class UpdatePost(graphene.Mutation):
                 post.body = body
             if post_pic_url is not None:
                 post.post_pic_url = post_pic_url
-            
+
+        # pylint: disable=no-member
         db.session.add(post)
         db.session.commit()
         return UpdatePost(post=post)
+
 
 class DeletePost(graphene.Mutation):
     class Arguments:
@@ -104,11 +118,13 @@ class DeletePost(graphene.Mutation):
     def mutate(self, info, post_id):
         email = get_jwt_identity()
         if email is None:
-            return GraphQLError('You need an access token to perform this action')
-            
+            return GraphQLError(
+                'You need an access token to perform this action')
+
         post = PostModel.query.filter_by(uuid=post_id).first()
         if post is not None:
+            # pylint: disable=no-member
             db.session.delete(post)
             db.session.commit()
-        
+
         return DeletePost(post=post)

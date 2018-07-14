@@ -5,6 +5,7 @@ from datetime import datetime
 class Notification(db.Model):
     __tablename__ = 'notification'
 
+    # pylint: disable=no-member
     uuid = db.Column(db.Integer, primary_key=True)
     read = db.Column(db.Boolean, default=False)
     type = db.Column(db.String(32), index=True)

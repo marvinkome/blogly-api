@@ -17,16 +17,6 @@ def profile(length=25, profile_dir=None):
     app.run(host='0.0.0.1', port=5000)
 
 @manager.command
-def deploy():
-    """Run deployment tasks."""
-    from flask_migrate import upgrade, init, migrate
-    
-    # migrate database to latest revision
-    init()
-    migrate()
-    upgrade()
-
-@manager.command
 def upgrade_db():
     """Run deployment tasks."""
     from flask_migrate import upgrade, init, migrate
@@ -101,6 +91,10 @@ class Server(_Server):
                 use_debugger = True
         if use_reloader is None:
             use_reloader = app.debug
+
+        # cert = os.path.join(os.path., 'cert.pem')
+        # key = os.path.join(os.path.abspath(), 'key.pem')
+
         socket.run(app,
                      host=host,
                      port=port,
