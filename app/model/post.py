@@ -6,7 +6,7 @@ from datetime import datetime
 from .. import db
 from ..helpers import generate_graphql_token
 
-from .tags import TagsRelationship
+from .tags import Tags
 from .user import User
 
 
@@ -22,16 +22,12 @@ class Post(db.Model):
     views = db.Column(db.Integer, default=0)
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.uuid'))
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.uuid'))
 
     comments = db.relationship('Comment', backref='post', lazy='dynamic')
     claps = db.relationship('Clap', backref='post', lazy='dynamic')
     notification = db.relationship(
         'Notification', backref='post', lazy='dynamic')
-    tags = db.relationship(
-        'Tags',
-        secondary=TagsRelationship,
-        backref=db.backref('posts', lazy='dynamic'),
-        lazy='dynamic')
 
     @hybrid_property
     def next_title(self):
@@ -61,18 +57,22 @@ class Post(db.Model):
 
         seed()
         user_count = User.query.count()
+        tag_count = Tags.query.count()
 
         for i in range(count):
             u = User.query.offset(randint(0, user_count - 1)).first()
+            t = Tags.query.offset(randint(0, tag_count - 1)).first()
             p = Post(
                 title=forgery_py.lorem_ipsum.title(3),
                 body=forgery_py.lorem_ipsum.sentences(randint(1, 3)),
                 timestamp=forgery_py.date.date(True),
                 post_pic_url=None,
-                author=u)
+                author=u,
+                tag=t)
 
             db.session.add(p)
-            db.session.commit()
+
+        db.session.commit()
 
     def __repr__(self):
         return '<Post %r>' % self.title

@@ -1,5 +1,6 @@
 import graphene
 import re
+from flask import jsonify
 from graphql import GraphQLError
 from flask_jwt_extended import (create_refresh_token,
                                 jwt_refresh_token_required,
@@ -36,7 +37,7 @@ class LoginUser(graphene.Mutation):
         if not check_password:
             return GraphQLError('Password doesn\'t match with this email')
 
-        refresh_token = create_refresh_token(identity=user.username)
+        refresh_token = create_refresh_token(identity=user.email)
 
         return LoginUser(token=refresh_token)
 
