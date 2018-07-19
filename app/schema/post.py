@@ -95,7 +95,8 @@ class UpdatePost(graphene.Mutation):
                 'You need an access token to perform this action')
 
         post = PostModel.query.filter_by(uuid=post_id).first()
-        tagData = TagModel.query.filter_by(name=None).first()
+        tagData = TagModel.query.filter_by(name=tag).first()
+        
         if post is not None:
             if title is not None:
                 post.title = title
