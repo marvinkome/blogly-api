@@ -88,7 +88,13 @@ class UpdatePost(graphene.Mutation):
 
     post = graphene.Field(lambda: Post)
 
-    def mutate(self, info, post_id, title=None, body=None, post_pic_url=None, tag=None):
+    def mutate(self,
+               info,
+               post_id,
+               title=None,
+               body=None,
+               post_pic_url=None,
+               tag=None):
         email = get_jwt_identity()
         if email is None:
             return GraphQLError(
@@ -96,7 +102,7 @@ class UpdatePost(graphene.Mutation):
 
         post = PostModel.query.filter_by(uuid=post_id).first()
         tagData = TagModel.query.filter_by(name=tag).first()
-        
+
         if post is not None:
             if title is not None:
                 post.title = title

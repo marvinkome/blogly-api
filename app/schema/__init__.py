@@ -48,8 +48,10 @@ class Query(graphene.ObjectType):
 
     post = graphene.Field(Post, title=graphene.String())
     user = graphene.Field(User)
+
     notifications = graphene.List(
         Notification, email=graphene.String(), sort=graphene.Boolean())
+
     public_user = graphene.Field(User, name=graphene.String())
 
     def resolve_post(self, info, title):
@@ -86,4 +88,4 @@ class Query(graphene.ObjectType):
         return query.filter_by(author=user, read=False)
 
 
-schema = graphene.Schema(query=Query, mutation=Mutation, types=[User, Post])
+schema = graphene.Schema(query=Query, mutation=Mutation)
