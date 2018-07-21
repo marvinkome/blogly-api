@@ -3,6 +3,7 @@ from sqlalchemy import desc
 from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
 from graphene_sqlalchemy.utils import get_query
 
+
 class CountableConnection(graphene.relay.Connection):
     class Meta:
         abstract = True
@@ -26,17 +27,22 @@ class CustomSQLAlchemyObjectType(SQLAlchemyObjectType):
                                     only_fields=(),
                                     exclude_fields=(),
                                     connection=None,
+                                    connection_class=None,
                                     use_connection=None,
                                     interfaces=(),
                                     id=None,
+                                    _meta=None,
                                     **options):
         # Force it to use the countable connection
         countable_conn = connection or CountableConnection.create_type(
             "{}CountableConnection".format(model.__name__), node=cls)
 
         super(CustomSQLAlchemyObjectType, cls).__init_subclass_with_meta__(
-            model, registry, skip_registry, only_fields, exclude_fields,
-            countable_conn, use_connection, interfaces, id, **options)
+            model,
+            _meta=_meta,
+            interfaces=interfaces,
+            connection=countable_conn,
+            **options)
 
 
 class DescSortAbleConnectionField(SQLAlchemyConnectionField):

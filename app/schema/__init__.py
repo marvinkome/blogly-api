@@ -1,6 +1,7 @@
 import graphene
-from graphene import relay
+from graphene import relay, Argument, List
 from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
+from graphene_sqlalchemy.utils import sort_argument_for_model
 from graphql import GraphQLError
 
 from flask_jwt_extended import get_jwt_identity
@@ -13,7 +14,7 @@ from .post import Post, CreatePost, UpdatePost, DeletePost, ViewPost
 from .comment import Comment, CreateComment, CreateReplyComment
 from .claps import Clap, CreateClap
 from .tags import Tags, CreateTag
-from .notifications import Notification
+from .notifications import Notification, ReadNotifications
 from .authentication import LoginUser, CreateUser, RefreshToken
 from .helpers import DescSortAbleConnectionField
 
@@ -34,6 +35,8 @@ class Mutation(graphene.ObjectType):
 
     create_clap = CreateClap.Field()
 
+    read_notifications = ReadNotifications.Field()
+
     login_user = LoginUser.Field()
     create_user = CreateUser.Field()
     refresh_token = RefreshToken.Field()
@@ -43,8 +46,8 @@ class Query(graphene.ObjectType):
     node = relay.Node.Field()
 
     # all posts
-    all_post = DescSortAbleConnectionField(
-        Post, sort_by=graphene.Argument(graphene.String))
+    all_post = SQLAlchemyConnectionField(
+        Post, sort=sort_argument_for_model(PostModel))
 
     post = graphene.Field(Post, title=graphene.String())
     user = graphene.Field(User)

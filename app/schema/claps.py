@@ -4,23 +4,22 @@ from graphene_sqlalchemy import SQLAlchemyObjectType
 from graphql import GraphQLError
 from flask_jwt_extended import get_jwt_identity
 
-from ..model import (
-    Clap as ClapModel, 
-    User as UserModel, 
-    Post as PostModel,
-    Notification as NotificationModel
-)
+from ..model import (Clap as ClapModel, User as UserModel, Post as PostModel,
+                     Notification as NotificationModel)
 from .. import db, socket
 from ..helpers import get_unread_notifications
 from .post import Post
 from .helpers import CustomSQLAlchemyObjectType
+
 
 class Clap(CustomSQLAlchemyObjectType):
     class Meta:
         model = ClapModel
         interfaces = (relay.Node, )
 
+
 class CreateClap(graphene.Mutation):
+    # pylint: disable=no-member
     class Arguments:
         post_id = graphene.Int(required=True)
 
@@ -31,7 +30,8 @@ class CreateClap(graphene.Mutation):
 
         email = get_jwt_identity()
         if email is None:
-            return GraphQLError('You need an access token to perform this action')
+            return GraphQLError(
+                'You need an access token to perform this action')
 
         user = UserModel.query.filter_by(email=email).first()
 
@@ -47,7 +47,8 @@ class CreateClap(graphene.Mutation):
             emit = False
 
             # create new notification only if user has not clapped before
-            user_claps = NotificationModel.query.filter_by(from_author=user, type='clapped').count()
+            user_claps = NotificationModel.query.filter_by(
+                from_author=user, type='clapped').count()
             if user_claps == 0:
                 notification.author_id = post.author.uuid
                 notification.post_id = post.uuid
@@ -60,10 +61,9 @@ class CreateClap(graphene.Mutation):
 
         if emit is True:
             socket.emit(
-                'notifications', 
-                get_unread_notifications(post.author), 
-                room=post.author.session_id, 
-                broadcast=False
-            )
-            
+                'notifications',
+                get_unread_notifications(post.author),
+                room=post.author.session_id,
+                broadcast=False)
+
         return CreateClap(post=post)
