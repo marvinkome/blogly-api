@@ -24,7 +24,8 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(
         basedir, 'data.sqlite')
-    CLIENT_SIDE_ORIGIN = 'http://localhost:3000'  # Change this if contributing
+    CLIENT_SIDE_ORIGIN = ['http://localhost:3000', 'http://localhost:8080'
+                          ]  # Change this if contributing
 
 
 class TestingConfig(Config):
@@ -37,7 +38,10 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
-    CLIENT_SIDE_ORIGIN = 'https://reactpress.herokuapp.com'
+    CLIENT_SIDE_ORIGIN = [
+        'https://reactpress.herokuapp.com', 'https://blogly.now.sh',
+        'http://blogly.now.sh'
+    ]
 
     @classmethod
     def init_app(cls, app):
