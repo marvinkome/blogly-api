@@ -38,10 +38,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
-    CLIENT_SIDE_ORIGIN = [
-        'https://reactpress.herokuapp.com', 'https://blogly.now.sh',
-        'http://blogly.now.sh'
-    ]
+    CLIENT_SIDE_ORIGIN = ['https://blogly.now.sh', 'http://blogly.now.sh']
 
     @classmethod
     def init_app(cls, app):
